@@ -3,6 +3,10 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 import os
 import math
 import random
+import sys
+
+# Forces the game to find your 'assets/' folder relative to the executable launcher
+os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
 
 app = Ursina()
 
