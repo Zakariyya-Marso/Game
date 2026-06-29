@@ -1,0 +1,56 @@
+name: Build Multi-Platform Game
+
+on:
+  push:
+    branches: [ main, master ]  # Triggers the build whenever you push to main or master
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ursina panda3d pyinstaller
+
+    # --- WINDOWS COMPILATION ---
+    - name: Build Executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" main.py
+
+    # --- MACOS COMPILATION & DMG PACKAGING ---
+    - name: Build Executable & DMG (Mac)
+      if: matrix.os == 'macos-latest'
+      run: |
+        pip install dmgbuild
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" main.py
+        hdiutil create -volname "PythonLifeSim" -srcfolder dist/main.app -ov -format UDZO PythonLifeSim.dmg
+        # Move the DMG into dist so it gets uploaded with the artifacts
+        mv PythonLifeSim.dmg dist/
+
+    # --- LINUX COMPILATION ---
+    - name: Build Executable (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" main.py
+
+    # --- UPLOAD FINAL FILES ---
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: game-distribution-${{ matrix.os }}
+        path: dist/
