@@ -32,14 +32,22 @@ jobs:
     - name: Build Executable (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" --collect-all "ursina" main.py
+        pyinstaller --noconfirm --onedir --windowed \
+          --add-data "assets;assets" \
+          --collect-all "ursina" \
+          --collect-all "panda3d" \
+          main.py
 
     # --- MACOS COMPILATION & DMG PACKAGING ---
     - name: Build Executable & DMG (Mac)
       if: matrix.os == 'macos-latest'
       run: |
         pip install dmgbuild
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-all "ursina" main.py
+        pyinstaller --noconfirm --onedir --windowed \
+          --add-data "assets:assets" \
+          --collect-all "ursina" \
+          --collect-all "panda3d" \
+          main.py
         
         # Give the macOS runner a quick moment to register the new files
         sleep 5
