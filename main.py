@@ -1,12 +1,19 @@
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
-import os
 import math
 import random
+import os
 import sys
 
-# Forces the game to find your 'assets/' folder relative to the executable launcher
-os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
+# Helper function to find asset paths when compiled by PyInstaller
+def input_path(relative_path):
+    try:
+        # PyInstaller creates a temporary folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 
 app = Ursina()
 
