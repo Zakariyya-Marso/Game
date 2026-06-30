@@ -11,7 +11,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false  # This prevents one failing platform from cancelling the others
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
@@ -34,21 +34,10 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" --collect-all "ursina" --collect-all "panda3d" main.py
 
-    # --- MACOS COMPILATION & DMG PACKAGING ---
-    - name: Build Executable & DMG (Mac)
+    # --- MACOS COMPILATION ---
+    - name: Build Executable (Mac)
       if: matrix.os == 'macos-latest'
-      run: |
-        pip install dmgbuild
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-all "ursina" --collect-all "panda3d" main.py
-        sleep 5
-        if [ -d "dist/main.app" ]; then
-          hdiutil create -volname "PythonLifeSim" -srcfolder dist/main.app -ov -format UDZO PythonLifeSim.dmg
-        elif [ -d "dist/Game.app" ]; then
-          hdiutil create -volname "PythonLifeSim" -srcfolder dist/Game.app -ov -format UDZO PythonLifeSim.dmg
-        else
-          echo "Error: Application bundle not found in dist/" && exit 1
-        fi
-        mv PythonLifeSim.dmg dist/
+      run: pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-all "ursina" --collect-all "panda3d" main.py
 
     # --- LINUX COMPILATION ---
     - name: Build Executable (Linux)
