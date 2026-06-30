@@ -2,7 +2,7 @@ name: Build Multi-Platform Game
 
 on:
   push:
-    branches: [ main, master ]  # Triggers the build whenever you push to main or master
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 
@@ -32,14 +32,14 @@ jobs:
     - name: Build Executable (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" main.py
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" --collect-all "ursina" main.py
 
     # --- MACOS COMPILATION & DMG PACKAGING ---
     - name: Build Executable & DMG (Mac)
       if: matrix.os == 'macos-latest'
       run: |
         pip install dmgbuild
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" main.py
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-all "ursina" main.py
         
         # Give the macOS runner a quick moment to register the new files
         sleep 5
@@ -64,6 +64,7 @@ jobs:
           --collect-submodules "direct" \
           --collect-submodules "panda3d" \
           --collect-all "panda3d" \
+          --collect-all "ursina" \
           main.py
 
     # --- UPLOAD FINAL FILES ---
