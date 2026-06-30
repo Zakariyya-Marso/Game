@@ -11,6 +11,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # This prevents one failing platform from cancelling the others
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
@@ -31,28 +32,15 @@ jobs:
     # --- WINDOWS COMPILATION ---
     - name: Build Executable (Windows)
       if: matrix.os == 'windows-latest'
-      run: |
-        pyinstaller --noconfirm --onedir --windowed \
-          --add-data "assets;assets" \
-          --collect-all "ursina" \
-          --collect-all "panda3d" \
-          main.py
+      run: pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" --collect-all "ursina" --collect-all "panda3d" main.py
 
     # --- MACOS COMPILATION & DMG PACKAGING ---
     - name: Build Executable & DMG (Mac)
       if: matrix.os == 'macos-latest'
       run: |
         pip install dmgbuild
-        pyinstaller --noconfirm --onedir --windowed \
-          --add-data "assets:assets" \
-          --collect-all "ursina" \
-          --collect-all "panda3d" \
-          main.py
-        
-        # Give the macOS runner a quick moment to register the new files
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-all "ursina" --collect-all "panda3d" main.py
         sleep 5
-        
-        # Verify if it built main.app or Game.app, then create the DMG safely
         if [ -d "dist/main.app" ]; then
           hdiutil create -volname "PythonLifeSim" -srcfolder dist/main.app -ov -format UDZO PythonLifeSim.dmg
         elif [ -d "dist/Game.app" ]; then
@@ -60,20 +48,12 @@ jobs:
         else
           echo "Error: Application bundle not found in dist/" && exit 1
         fi
-        
         mv PythonLifeSim.dmg dist/
 
     # --- LINUX COMPILATION ---
     - name: Build Executable (Linux)
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        pyinstaller --noconfirm --onedir --windowed \
-          --add-data "assets:assets" \
-          --collect-submodules "direct" \
-          --collect-submodules "panda3d" \
-          --collect-all "panda3d" \
-          --collect-all "ursina" \
-          main.py
+      run: pyinstaller --noconfirm --onedir --windowed --add-data "assets:assets" --collect-submodules "direct" --collect-submodules "panda3d" --collect-all "panda3d" --collect-all "ursina" main.py
 
     # --- UPLOAD FINAL FILES ---
     - name: Upload Build Artifacts
